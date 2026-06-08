@@ -1,0 +1,6 @@
+{
+  "name": "Telugu Music",
+  "description": "An elegant and modern Telugu music streaming player with search, genre filters, interactive audio simulator, and persistent favorites.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
