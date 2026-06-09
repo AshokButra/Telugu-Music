@@ -26,17 +26,17 @@ export default function SongCard({
     <div
       id={`song-card-${song.id}`}
       onClick={() => onPlay(song)}
-      className={`group relative flex flex-col bg-[#111625]/60 hover:bg-[#151c30]/90 border rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 select-none overflow-hidden ${
+      className={`group relative flex flex-col app-card app-card-hover border rounded-xl sm:rounded-2xl p-3 sm:p-4 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 select-none overflow-hidden ${
         isActive 
-          ? 'border-violet-500/50 bg-violet-950/20 shadow-lg shadow-violet-500/5' 
+          ? 'border-violet-500/50 app-card-strong shadow-lg shadow-violet-500/5' 
           : 'border-white/[0.04] hover:border-white/10'
       }`}
     >
       {/* Decorative gradient flare on hover */}
-      <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-violet-600/5 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full app-accent-glow opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-500 pointer-events-none" />
 
       {/* Album Cover Container */}
-      <div className="relative aspect-square rounded-xl overflow-hidden mb-3 bg-[#0c0f17]">
+      <div className="relative aspect-square rounded-xl overflow-hidden mb-3 app-card-soft">
         <img
           src={song.coverImage}
           alt={song.title}
@@ -48,7 +48,7 @@ export default function SongCard({
         <div className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity duration-300 ${
           isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
         }`}>
-          <div className="p-3.5 rounded-full bg-violet-600 text-white shadow-lg hover:scale-110 active:scale-95 transition-transform duration-200">
+          <div className="p-3.5 rounded-full app-logo-gradient text-white shadow-lg hover:scale-110 active:scale-95 transition-transform duration-200">
             {isActive && isPlaying ? (
               <Pause className="w-5 h-5 fill-white" />
             ) : (
@@ -64,7 +64,7 @@ export default function SongCard({
 
         {/* Dynamic Wave Icon if Active */}
         {isActive && isPlaying && (
-          <div className="absolute bottom-2 right-2 flex items-center gap-[2px] bg-violet-600/90 px-2 py-1 rounded-md backdrop-blur-sm">
+          <div className="absolute bottom-2 right-2 flex items-center gap-[2px] px-2 py-1 rounded-md backdrop-blur-sm app-logo-gradient">
             <span className="w-1 h-3.5 bg-white rounded-full animate-[bounce_1s_infinite_100ms]" />
             <span className="w-1 h-4.5 bg-white rounded-full animate-[bounce_1s_infinite_200ms]" />
             <span className="w-1 h-2.5 bg-white rounded-full animate-[bounce_1s_infinite_300ms]" />
@@ -83,9 +83,9 @@ export default function SongCard({
           <button
             id={`heart-btn-${song.id}`}
             onClick={(e) => onToggleFavorite(e, song.id)}
-            className="text-neutral-500 hover:text-fuchsia-400 p-1 rounded-md hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="text-neutral-500 app-card-hover p-1 rounded-md transition-colors cursor-pointer hover:text-violet-400"
           >
-            <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-fuchsia-500 stroke-fuchsia-500 text-fuchsia-400 scale-110' : ''}`} />
+            <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current app-accent-text scale-110' : ''}`} />
           </button>
         </div>
 

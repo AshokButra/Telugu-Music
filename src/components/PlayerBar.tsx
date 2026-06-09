@@ -235,7 +235,7 @@ export default function PlayerBar({
       id={id}
       onClick={onCycleRepeat}
       className={`relative p-1.5 rounded-lg transition-colors cursor-pointer ${
-        repeatActive ? 'text-violet-400 hover:text-violet-300' : 'text-neutral-500 hover:text-white'
+        repeatActive ? 'app-accent-text' : 'text-neutral-500 hover:text-white'
       }`}
       title={repeatTitle}
     >
@@ -245,7 +245,7 @@ export default function PlayerBar({
         <Repeat className={mobile ? 'w-4 h-4' : 'w-4 h-4'} />
       )}
       {repeatMode === 'one' && (
-        <span className="absolute -top-0.5 -right-0.5 text-[8px] font-extrabold text-violet-400 leading-none">
+        <span className="absolute -top-0.5 -right-0.5 text-[8px] font-extrabold app-accent-text leading-none">
           1
         </span>
       )}
@@ -264,7 +264,7 @@ export default function PlayerBar({
       title={hasError ? 'Load Error! Click to Retry.' : (isPlaying ? 'Pause' : 'Play')}
     >
       {isLoading ? (
-        <div className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-current app-accent-text border-t-transparent rounded-full animate-spin" />
       ) : hasError ? (
         <AlertCircle className="w-5 h-5 text-white stroke-[2.5px]" />
       ) : isPlaying ? (
@@ -276,9 +276,9 @@ export default function PlayerBar({
   );
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#070b14]/95 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] app-player-bg">
       {/* Progress bar */}
-      <div className="w-full px-3 sm:px-4 md:px-8 pt-2.5 sm:pt-3">
+      <div className="w-full max-w-[720px] md:max-w-7xl mx-auto px-3 sm:px-4 md:px-8 pt-2.5 sm:pt-3">
         <input
           type="range"
           min={0}
@@ -288,7 +288,7 @@ export default function PlayerBar({
           onChange={handleSeek}
           className="player-range w-full h-2 sm:h-1.5 md:h-1 focus:outline-none rounded-lg appearance-none cursor-pointer accent-violet-500 transition-all"
           style={{
-            background: `linear-gradient(to right, rgb(139, 92, 246) ${progressPercentage}%, rgba(255, 255, 255, 0.1) ${progressPercentage}%)`
+            background: `linear-gradient(to right, rgba(var(--accent-rgb), 1) ${progressPercentage}%, rgba(255, 255, 255, 0.1) ${progressPercentage}%)`
           }}
         />
         <div className="flex justify-between text-[10px] sm:text-[11px] font-mono text-neutral-400 mt-1">
@@ -298,7 +298,7 @@ export default function PlayerBar({
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden px-3 pb-2.5 pt-1 space-y-2.5">
+      <div className="md:hidden max-w-[720px] mx-auto px-3 pb-2.5 pt-1 space-y-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-neutral-900">
             <img
@@ -314,16 +314,16 @@ export default function PlayerBar({
           </div>
           <button
             onClick={() => onToggleFavorite(currentSong.id)}
-            className="flex-shrink-0 text-neutral-400 hover:text-fuchsia-400 p-1.5 rounded-full"
+            className="flex-shrink-0 text-neutral-400 hover:text-violet-400 p-1.5 rounded-full"
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-fuchsia-500 stroke-fuchsia-500 text-fuchsia-400' : ''}`} />
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current app-accent-text' : ''}`} />
           </button>
           <button
             id="btn-lyrics-toggle-mobile"
             onClick={() => setShowLyrics(!showLyrics)}
             className={`flex-shrink-0 p-1.5 rounded-lg border transition-all ${
               showLyrics
-                ? 'bg-violet-500/10 border-violet-500/40 text-violet-300'
+                ? 'border-white/20 app-accent-text'
                 : 'border-white/[0.06] text-neutral-400'
             }`}
           >
@@ -337,21 +337,23 @@ export default function PlayerBar({
             {isMuted || volume === 0 ? (
               <VolumeX className="w-4 h-4" />
             ) : (
-              <Volume2 className="w-4 h-4 text-violet-400" />
+              <Volume2 className="w-4 h-4 app-accent-text" />
             )}
           </button>
         </div>
 
-        <div className="flex items-center justify-between px-1">
-          <button
-            id="btn-shuffle-mobile"
-            onClick={() => setShuffle(!shuffle)}
-            className={`p-1.5 rounded-lg ${shuffle ? 'text-violet-400' : 'text-neutral-500'}`}
-          >
-            <Shuffle className="w-4 h-4" />
-          </button>
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center px-1">
+          <div className="flex justify-start">
+            <button
+              id="btn-shuffle-mobile"
+              onClick={() => setShuffle(!shuffle)}
+              className={`p-1.5 rounded-lg ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
+            >
+              <Shuffle className="w-4 h-4" />
+            </button>
+          </div>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-4.5 justify-center">
             <button id="btn-prev-mobile" onClick={onPrevious} className="p-1.5 text-neutral-300">
               <SkipBack className="w-5 h-5 fill-current" />
             </button>
@@ -361,7 +363,9 @@ export default function PlayerBar({
             </button>
           </div>
 
-          {repeatButton('btn-loop-mobile', true)}
+          <div className="flex justify-end">
+            {repeatButton('btn-loop-mobile', true)}
+          </div>
         </div>
       </div>
 
@@ -376,7 +380,7 @@ export default function PlayerBar({
               className="w-full h-full object-cover group-hover:rotate-6 transition-transform"
             />
             <div className="absolute inset-0 bg-violet-950/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-              <Sparkles className="w-4.5 h-4.5 text-white animate-pulse" />
+              <Sparkles className="w-4.5 h-4.5 app-accent-text animate-pulse" />
             </div>
           </div>
 
@@ -399,9 +403,9 @@ export default function PlayerBar({
 
           <button
             onClick={() => onToggleFavorite(currentSong.id)}
-            className="flex-shrink-0 text-neutral-400 hover:text-fuchsia-400 p-1.5 rounded-full hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="flex-shrink-0 text-neutral-400 hover:text-violet-400 p-1.5 rounded-full hover:bg-white/[0.04] transition-colors cursor-pointer"
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-fuchsia-500 stroke-fuchsia-500 text-fuchsia-400 scale-110' : ''}`} />
+            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current app-accent-text scale-110' : ''}`} />
           </button>
         </div>
 
@@ -410,7 +414,7 @@ export default function PlayerBar({
             id="btn-shuffle"
             onClick={() => setShuffle(!shuffle)}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-              shuffle ? 'text-violet-400 hover:text-violet-300' : 'text-neutral-500 hover:text-white'
+              shuffle ? 'app-accent-text' : 'text-neutral-500 hover:text-white'
             }`}
             title="Shuffle"
           >
@@ -446,7 +450,7 @@ export default function PlayerBar({
             onClick={() => setShowLyrics(!showLyrics)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
               showLyrics
-                ? 'bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-violet-300'
+                ? 'border-white/20 app-accent-text'
                 : 'bg-white/[0.02] border-white/[0.05] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]'
             }`}
           >
@@ -463,7 +467,7 @@ export default function PlayerBar({
               {isMuted || volume === 0 ? (
                 <VolumeX className="w-4 h-4 text-neutral-500" />
               ) : (
-                <Volume2 className="w-4 h-4 text-violet-400" />
+                <Volume2 className="w-4 h-4 app-accent-text" />
               )}
             </button>
 
@@ -478,7 +482,7 @@ export default function PlayerBar({
               }}
               className="player-range w-20 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-violet-500"
               style={{
-                background: `linear-gradient(to right, rgb(139, 92, 246) ${isMuted ? 0 : volume}%, rgba(255, 255, 255, 0.1) ${isMuted ? 0 : volume}%)`
+                background: `linear-gradient(to right, rgba(var(--accent-rgb), 1) ${isMuted ? 0 : volume}%, rgba(255, 255, 255, 0.1) ${isMuted ? 0 : volume}%)`
               }}
             />
           </div>

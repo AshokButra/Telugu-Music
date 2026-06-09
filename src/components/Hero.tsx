@@ -15,15 +15,15 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
   const isFavorite = favoriteIds.includes(featuredSong.id);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-violet-950 via-[#101524] to-[#0a0d17] border border-white/[0.06] p-4 sm:p-8 md:p-10 lg:p-12 mb-6 sm:mb-8 shadow-2xl">
+    <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl app-main-card-gradient border border-white/[0.06] p-4 sm:p-8 md:p-10 lg:p-12 mb-6 sm:mb-8 shadow-2xl">
       {/* Background radial soft light gradient */}
-      <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-violet-600/10 blur-[90px] pointer-events-none" />
-      <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-fuchsia-600/10 blur-[90px] pointer-events-none" />
+      <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full app-accent-glow blur-[90px] pointer-events-none" />
+      <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full app-accent-glow blur-[90px] pointer-events-none" />
       
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Left Info Column */}
         <div className="col-span-1 lg:col-span-7 space-y-5">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold uppercase tracking-wider animate-bounce">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full app-accent-surface text-xs font-semibold uppercase tracking-wider animate-bounce">
             <Award className="w-3.5 h-3.5" />
             <span>Oscar Spotlight Hit</span>
           </div>
@@ -54,7 +54,7 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
             <button
               id="hero-play-button"
               onClick={() => onPlaySong(featuredSong)}
-              className="group flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg shadow-indigo-500/15 cursor-pointer transform hover:-translate-y-0.5 transition-all select-none w-full sm:w-auto"
+              className="group flex items-center justify-center gap-2 app-logo-gradient text-white font-semibold text-sm px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg cursor-pointer transform hover:-translate-y-0.5 transition-all select-none w-full sm:w-auto"
             >
               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 group-hover:scale-110 transition-transform">
                 <Play className="w-3 h-3 fill-white ml-0.5 text-white" />
@@ -67,11 +67,11 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
               onClick={() => toggleFavorite(featuredSong.id)}
               className={`flex items-center justify-center gap-2 border px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm font-semibold cursor-pointer transform hover:-translate-y-0.5 transition-all select-none w-full sm:w-auto ${
                 isFavorite 
-                  ? 'border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300' 
-                  : 'border-white/[0.1] bg-[#1a2135]/40 text-neutral-300 hover:bg-[#1f2942]'
+                  ? 'app-accent-surface app-accent-surface-hover'
+                  : 'border-white/[0.1] app-card text-neutral-300 app-card-hover'
               }`}
             >
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-fuchsia-400 stroke-fuchsia-400' : 'text-neutral-300'}`} />
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : 'text-neutral-300'}`} />
               {isFavorite ? 'Spotlight Loved' : 'Add to Library'}
             </button>
           </div>
@@ -81,7 +81,7 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
         <div className="col-span-1 lg:col-span-15 block lg:col-start-9">
           <div className="relative group mx-auto max-w-[280px] sm:max-w-[320px]">
             {/* Soft decorative shadow layers */}
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+            <div className="absolute -inset-1.5 app-logo-gradient rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
             
             <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/[0.1] shadow-2xl">
               <img
@@ -93,7 +93,7 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
               
               {/* Dynamic overlay label */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-5">
-                <span className="text-[10px] font-mono tracking-widest text-violet-400 uppercase font-semibold">Track Of The Week</span>
+                <span className="text-[10px] font-mono tracking-widest app-accent-text uppercase font-semibold">Track Of The Week</span>
                 <span className="text-white font-bold text-lg mt-0.5">Telugu Cinematic Era</span>
               </div>
             </div>

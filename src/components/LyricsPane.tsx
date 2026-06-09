@@ -10,7 +10,7 @@ export default function LyricsPane({ song, onClose }: LyricsPaneProps) {
   if (!song) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-40 w-full sm:w-96 bg-[#080c15] border-l border-white/[0.08] shadow-2xl flex flex-col pt-14 sm:pt-16 pb-36 sm:pb-28 md:pb-24 overflow-hidden">
+    <div className="fixed inset-y-0 right-0 z-40 w-full sm:w-96 app-card-strong border-l border-white/[0.08] shadow-2xl flex flex-col pt-14 sm:pt-16 pb-36 sm:pb-28 md:pb-24 overflow-hidden">
       {/* Pane Title Bar */}
       <div className="p-5 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -28,7 +28,7 @@ export default function LyricsPane({ song, onClose }: LyricsPaneProps) {
       </div>
 
       {/* Pane Header Meta */}
-      <div className="p-6 bg-gradient-to-b from-violet-950/20 to-transparent border-b border-white/[0.03]">
+      <div className="p-6 app-main-card-gradient border-b border-white/[0.03]">
         <div className="flex items-center gap-3">
           <img
             src={song.coverImage}

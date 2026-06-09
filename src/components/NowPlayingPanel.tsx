@@ -25,7 +25,7 @@ export default function NowPlayingPanel({
   return (
     <div className="space-y-5">
       {/* Now playing hero */}
-      <div className="p-5 rounded-2xl bg-gradient-to-b from-violet-950/30 to-[#0e121e]/60 border border-violet-500/20 shadow-xl">
+      <div className="p-5 rounded-2xl app-main-card-gradient border border-violet-500/20 shadow-xl">
         <div className="flex items-center gap-2 mb-4">
           <Radio className={`w-4 h-4 text-violet-400 ${isPlaying ? 'animate-pulse' : ''}`} />
           <h3 className="font-extrabold text-neutral-100 text-sm uppercase tracking-tight font-mono">
@@ -57,7 +57,7 @@ export default function NowPlayingPanel({
 
       {/* Up next queue */}
       {upNext.length > 0 && (
-        <div className="p-5 rounded-2xl bg-[#0e121e]/60 border border-white/[0.05]">
+        <div className="p-5 rounded-2xl app-card-soft">
           <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/[0.04]">
             <ListMusic className="w-4 h-4 text-violet-400" />
             <h3 className="font-extrabold text-neutral-100 text-sm uppercase tracking-tight font-mono">
@@ -91,7 +91,7 @@ export default function NowPlayingPanel({
       )}
 
       {/* Quick album picks */}
-      <div className="p-5 rounded-2xl bg-[#0e121e]/60 border border-white/[0.05]">
+      <div className="p-5 rounded-2xl app-card-soft">
         <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/[0.04]">
           <Disc3 className="w-4 h-4 text-violet-400" />
           <h3 className="font-extrabold text-neutral-100 text-sm uppercase tracking-tight font-mono">

@@ -3,7 +3,7 @@ import {
   Plus, Play, Heart, Star, Sparkles, Filter, 
   Trash2, RotateCcw, AlertCircle, Award, Compass, Music, Headphones
 } from 'lucide-react';
-import { Song, RepeatMode } from './types';
+import { Song, RepeatMode, ThemeMode, AccentColor } from './types';
 import {
   TELUGU_SONGS,
   TELUGU_ALBUMS,
@@ -45,9 +45,37 @@ export default function App() {
   const [shuffle, setShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('off');
   const [showLyrics, setShowLyrics] = useState(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    try {
+      const saved = localStorage.getItem('swaram_theme_mode');
+      return saved === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+  const [accentColor, setAccentColor] = useState<AccentColor>(() => {
+    try {
+      const saved = localStorage.getItem('swaram_accent_color');
+      const allowed: AccentColor[] = ['purple', 'emerald', 'rose', 'amber', 'sky'];
+      return allowed.includes(saved as AccentColor) ? (saved as AccentColor) : 'purple';
+    } catch {
+      return 'purple';
+    }
+  });
 
   const cycleRepeatMode = () => {
     setRepeatMode((prev) => (prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off'));
+  };
+
+  const cycleThemeMode = () => {
+    setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const cycleAccentColor = () => {
+    const accents: AccentColor[] = ['purple', 'emerald', 'rose', 'amber', 'sky'];
+    const currentIndex = accents.indexOf(accentColor);
+    const nextIndex = (currentIndex + 1) % accents.length;
+    setAccentColor(accents[nextIndex]);
   };
 
   // Write favorites back to localStorage
@@ -58,6 +86,24 @@ export default function App() {
       console.error('Failed to save favorites to localStorage', e);
     }
   }, [favoriteIds]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = themeMode;
+    try {
+      localStorage.setItem('swaram_theme_mode', themeMode);
+    } catch (e) {
+      console.error('Failed to save theme mode', e);
+    }
+  }, [themeMode]);
+
+  useEffect(() => {
+    document.documentElement.dataset.accent = accentColor;
+    try {
+      localStorage.setItem('swaram_accent_color', accentColor);
+    } catch (e) {
+      console.error('Failed to save accent color', e);
+    }
+  }, [accentColor]);
 
   // Extract unique genre list from raw song data
   const genres = ['All', ...Array.from(new Set(TELUGU_SONGS.map(s => s.genre)))];
@@ -202,10 +248,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#06080e] text-neutral-100 font-sans pb-36 sm:pb-32 md:pb-28">
+    <div className="app-shell min-h-screen w-full font-sans pb-36 sm:pb-32 md:pb-28">
       {/* Decorative overhead glowing blobs */}
-      <div className="absolute top-0 left-1/4 w-[350px] h-[350px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
-      <div className="absolute top-20 right-1/4 w-[280px] h-[280px] rounded-full bg-indigo-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[350px] h-[350px] rounded-full blur-[120px] pointer-events-none app-accent-glow" />
+      <div className="absolute top-20 right-1/4 w-[280px] h-[280px] rounded-full blur-[100px] pointer-events-none app-accent-glow" />
 
       {/* Persistent Nav Sticky Header */}
       <Header
@@ -217,10 +263,14 @@ export default function App() {
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         favoriteCount={favoriteIds.length}
+        themeMode={themeMode}
+        onToggleTheme={cycleThemeMode}
+        accentColor={accentColor}
+        onCycleAccent={cycleAccentColor}
       />
 
       {/* Main Grid Section */}
-      <main className="w-full max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <main className="w-full max-w-[1600px] mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6">
         
         {/* Spotlight Showcase Hero */}
         {!showFavoritesOnly && !searchQuery && !selectedArtist && !selectedAlbum && activeGenre === 'All' && (
@@ -233,7 +283,7 @@ export default function App() {
 
         {/* Categories Tab Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-4">
             <div className="flex items-center gap-2">
               <Compass className="w-5 h-5 text-violet-400" />
               <h2 className="text-base sm:text-lg font-bold tracking-tight text-white uppercase font-mono">
@@ -244,7 +294,7 @@ export default function App() {
               <button
                 id="btn-clear-filters"
                 onClick={clearAllFilters}
-                className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-white font-semibold font-mono bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.04] px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+                className="flex items-center gap-1.5 text-xs app-accent-text hover:text-white font-semibold font-mono app-card app-card-hover border border-white/[0.04] px-3 py-1.5 rounded-lg cursor-pointer transition-all"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset Filters</span>
@@ -253,7 +303,7 @@ export default function App() {
           </div>
           
           {/* Scrollable genre track filter tags */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pb-2">
             {genres.map((genre) => (
               <button
                 key={genre}
@@ -264,8 +314,8 @@ export default function App() {
                 }}
                 className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer border select-none transition-all ${
                   activeGenre === genre
-                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 border-violet-500 text-white shadow-md shadow-indigo-600/10'
-                    : 'bg-[#111625]/40 border-white/[0.04] text-neutral-400 hover:border-white/10 hover:text-white'
+                    ? 'app-logo-gradient border-violet-500 text-white shadow-md'
+                    : 'app-card border-white/[0.04] text-neutral-400 hover:border-white/10 hover:text-white app-card-hover'
                 }`}
               >
                 {genre === 'All' ? '🔥 All Hits' : genre}
@@ -281,7 +331,7 @@ export default function App() {
           <div className="md:col-span-7 lg:col-span-8 space-y-8">
             <div>
               {/* Title metric label bar */}
-              <div className="flex items-center justify-between mb-4.5">
+              <div className="flex flex-col min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between gap-2 mb-4.5">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
                   <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-white">
@@ -295,7 +345,7 @@ export default function App() {
 
               {/* Grid or Empty list view */}
               {activeSongs.length > 0 ? (
-                <div id="songs-grid" className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
+                <div id="songs-grid" className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                   {activeSongs.map((song) => (
                     <SongCard
                       key={song.id}
@@ -309,7 +359,7 @@ export default function App() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-[#111625]/20 border border-white/[0.04] space-y-4">
+                <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl app-card border border-white/[0.04] space-y-4">
                   <div className="p-4 rounded-full bg-violet-500/10 text-violet-400">
                     <AlertCircle className="w-10 h-10" />
                   </div>
@@ -321,7 +371,7 @@ export default function App() {
                   </div>
                   <button
                     onClick={clearAllFilters}
-                    className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow shadow-violet-500/20 cursor-pointer select-none transition-all"
+                    className="px-5 py-2 rounded-xl app-logo-gradient text-white text-xs font-semibold shadow cursor-pointer select-none transition-all"
                   >
                     Clear Filter Criteria
                   </button>
@@ -366,7 +416,7 @@ export default function App() {
                 onFilterAlbum={handleFilterAlbum}
               />
 
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#0e121e]/60 border border-white/[0.05] shadow-xl">
+              <div className="p-5 sm:p-6 rounded-2xl app-card-soft shadow-xl">
                 <div className="flex items-center gap-2 mb-5.5 pb-3 border-b border-white/[0.04]">
                   <Award className="w-5 h-5 text-violet-400 animate-pulse" />
                   <h3 className="font-extrabold text-neutral-100 text-base uppercase tracking-tight font-mono">

@@ -14,10 +14,10 @@ export default function ArtistCard({ artist, onFilterByArtist, isActive }: Artis
     <div
       id={`artist-card-${artist.id}`}
       onClick={() => onFilterByArtist(artist.name)}
-      className={`group flex flex-col items-center text-center p-4 rounded-2xl cursor-pointer select-none transition-all duration-300 ${
+      className={`group flex flex-col items-center text-center p-4 rounded-2xl cursor-pointer select-none transition-all duration-300 app-card app-card-hover ${
         isActive 
-          ? 'bg-violet-950/25 border border-violet-500/30 shadow-md shadow-violet-500/5 scale-[1.03]' 
-          : 'bg-[#111625]/20 border border-transparent hover:bg-[#151c30]/50 hover:border-white/[0.04]'
+          ? 'app-card-strong border border-violet-500/30 shadow-md shadow-violet-500/5 scale-[1.03]' 
+          : 'border border-transparent hover:border-white/[0.04]'
       }`}
     >
       {/* Circle Image Wrapper */}

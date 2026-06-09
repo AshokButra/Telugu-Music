@@ -1,4 +1,5 @@
-import { Search, Music, Heart, Sparkles, AlertCircle } from 'lucide-react';
+import { Search, Music, Heart, Sparkles, Sun, Moon, Palette } from 'lucide-react';
+import { ThemeMode, AccentColor } from '../types';
 import { motion } from 'motion/react';
 
 interface HeaderProps {
@@ -10,6 +11,10 @@ interface HeaderProps {
   showFavoritesOnly: boolean;
   setShowFavoritesOnly: (fav: boolean) => void;
   favoriteCount: number;
+  themeMode: ThemeMode;
+  onToggleTheme: () => void;
+  accentColor: AccentColor;
+  onCycleAccent: () => void;
 }
 
 export default function Header({
@@ -20,10 +25,14 @@ export default function Header({
   genres,
   showFavoritesOnly,
   setShowFavoritesOnly,
-  favoriteCount
+  favoriteCount,
+  themeMode,
+  onToggleTheme,
+  accentColor,
+  onCycleAccent
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-white/[0.06] bg-[#090d16]/85 backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 pt-[max(0.625rem,env(safe-area-inset-top))]">
+    <header className="sticky top-0 z-30 w-full border-b border-white/[0.06] app-header-bg backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 pt-[max(0.625rem,env(safe-area-inset-top))]">
       {/* Platform Branding */}
       <div className="flex items-center justify-between">
         <div 
@@ -34,30 +43,48 @@ export default function Header({
             setShowFavoritesOnly(false);
           }}
         >
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl app-logo-gradient shadow-lg group-hover:scale-105 transition-transform">
             <Music className="w-5 h-5 text-white animate-pulse" />
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 rounded-xl opacity-30 blur group-hover:opacity-75 transition duration-500" />
+            <div className="absolute -inset-0.5 app-logo-gradient rounded-xl opacity-30 blur group-hover:opacity-75 transition duration-500" />
           </div>
           <div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-indigo-200 bg-clip-text text-transparent">
-              Swaram<span className="text-violet-500">.</span>
+            <span className="text-xl font-bold tracking-tight app-title-gradient bg-clip-text text-transparent">
+              Swaram<span className="app-accent-text">.</span>
             </span>
             <span className="block text-[10px] text-neutral-400 font-mono tracking-widest uppercase mt-[-2px]">TELUGU STREAM</span>
           </div>
         </div>
 
         {/* Favorite toggle for mobile explicitly alongside other triggers */}
-        <button
-          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-          className={`md:hidden flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold select-none transition-all ${
-            showFavoritesOnly 
-              ? 'bg-fuchsia-500/20 border-fuchsia-500/50 text-fuchsia-400' 
-              : 'bg-white/[0.02] border-white/[0.08] text-neutral-300 hover:bg-white/[0.05]'
-          }`}
-        >
-          <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-fuchsia-500' : ''}`} />
-          <span>({favoriteCount})</span>
-        </button>
+        <div className="md:hidden flex items-center gap-1.5">
+          <button
+            id="btn-theme-toggle-mobile"
+            onClick={onToggleTheme}
+            className="p-2 rounded-lg app-card text-neutral-300 app-card-hover transition-all"
+            title={themeMode === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          >
+            {themeMode === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
+          <button
+            id="btn-accent-toggle-mobile"
+            onClick={onCycleAccent}
+            className="p-2 rounded-lg app-card text-neutral-300 app-card-hover transition-all"
+            title={`Accent: ${accentColor}`}
+          >
+            <Palette className="w-3.5 h-3.5 app-accent-text" />
+          </button>
+          <button
+            onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold select-none transition-all ${
+              showFavoritesOnly
+                ? 'app-accent-surface'
+              : 'app-card text-neutral-300 app-card-hover'
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+            <span>({favoriteCount})</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Bar Items */}
@@ -73,12 +100,12 @@ export default function Header({
               setSearchQuery(e.target.value);
               if (showFavoritesOnly) setShowFavoritesOnly(false);
             }}
-            className="w-full bg-[#111625] text-neutral-100 placeholder-neutral-500 text-sm pl-10 pr-4 py-2.5 rounded-xl border border-white/[0.06] focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20 transition-all font-sans"
+            className="w-full app-card text-neutral-100 placeholder-neutral-500 text-sm pl-10 pr-4 py-2.5 rounded-xl focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/20 transition-all font-sans"
           />
           {searchQuery && (
             <button 
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-white/[0.08] text-neutral-400 hover:text-white text-xs hover:bg-white/[0.15] transition-all"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full app-card text-neutral-400 hover:text-white text-xs app-card-hover transition-all"
             >
               ×
             </button>
@@ -95,13 +122,29 @@ export default function Header({
           }}
           className={`hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold select-none cursor-pointer transition-all ${
             showFavoritesOnly 
-              ? 'bg-gradient-to-r from-fuchsia-500/20 to-violet-500/20 border-fuchsia-500/40 text-fuchsia-300 shadow-md shadow-fuchsia-500/5' 
-              : 'bg-[#111625] border-white/[0.06] text-neutral-300 hover:border-violet-500/40 hover:bg-[#151c30]'
+              ? 'app-accent-surface app-accent-surface-hover shadow-md'
+              : 'app-card text-neutral-300 app-card-hover hover:border-violet-500/40'
           }`}
         >
-          <Heart className={`w-4 h-4 transition-transform duration-300 ${showFavoritesOnly ? 'fill-fuchsia-400 stroke-fuchsia-400 scale-110 animate-pulse' : ''}`} />
+          <Heart className={`w-4 h-4 transition-transform duration-300 ${showFavoritesOnly ? 'fill-current scale-110 animate-pulse' : ''}`} />
           <span>My Favorites</span>
           <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full font-mono font-bold text-neutral-300">{favoriteCount}</span>
+        </button>
+        <button
+          id="btn-theme-toggle"
+          onClick={onToggleTheme}
+          className="hidden md:flex items-center justify-center p-2.5 rounded-xl app-card text-neutral-300 hover:border-white/20 app-card-hover transition-all"
+          title={themeMode === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+        >
+          {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+        <button
+          id="btn-accent-toggle"
+          onClick={onCycleAccent}
+          className="hidden md:flex items-center justify-center p-2.5 rounded-xl app-card text-neutral-300 hover:border-white/20 app-card-hover transition-all"
+          title={`Accent: ${accentColor}`}
+        >
+          <Palette className="w-4 h-4 app-accent-text" />
         </button>
       </div>
 
