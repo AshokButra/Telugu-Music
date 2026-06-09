@@ -11,6 +11,7 @@ import {
   STARTUP_SONG,
   getAlbumSongs,
   songMatchesArtist,
+  LYRICS_ENABLED,
 } from './data';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -49,6 +50,7 @@ export default function App() {
   const [showSongDetails, setShowSongDetails] = useState(false);
 
   const handleToggleLyrics = () => {
+    if (!LYRICS_ENABLED) return;
     setShowLyrics((prev) => {
       if (!prev) setShowSongDetails(false);
       return !prev;
@@ -441,7 +443,7 @@ export default function App() {
       </main>
 
       {/* Slide-out Transliterated Telugu Lyrics Pane */}
-      {showLyrics && currentSong && (
+      {LYRICS_ENABLED && showLyrics && currentSong && (
         <LyricsPane 
           song={currentSong} 
           onClose={() => setShowLyrics(false)} 
@@ -467,6 +469,7 @@ export default function App() {
         setShuffle={setShuffle}
         repeatMode={repeatMode}
         onCycleRepeat={cycleRepeatMode}
+        lyricsEnabled={LYRICS_ENABLED}
         showLyrics={showLyrics}
         onToggleLyrics={handleToggleLyrics}
         showSongDetails={showSongDetails}

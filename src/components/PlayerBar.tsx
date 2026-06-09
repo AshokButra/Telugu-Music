@@ -15,6 +15,7 @@ interface PlayerBarProps {
   setShuffle: (shuf: boolean) => void;
   repeatMode: RepeatMode;
   onCycleRepeat: () => void;
+  lyricsEnabled?: boolean;
   showLyrics: boolean;
   onToggleLyrics: () => void;
   showSongDetails: boolean;
@@ -39,6 +40,7 @@ export default function PlayerBar({
   setShuffle,
   repeatMode,
   onCycleRepeat,
+  lyricsEnabled = false,
   showLyrics,
   onToggleLyrics,
   showSongDetails,
@@ -284,13 +286,13 @@ export default function PlayerBar({
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden app-player-inner app-player-mobile-controls pb-2.5 pt-1 min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="md:hidden app-player-inner app-player-mobile-controls pb-2 pt-1 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           <button
             type="button"
             id="btn-song-details-mobile"
             onClick={onToggleSongDetails}
-            className={`relative w-8 h-8 rounded-md overflow-hidden flex-shrink-0 border transition-all ${
+            className={`relative w-7 h-7 max-w-7 max-h-7 rounded overflow-hidden flex-shrink-0 border transition-all ${
               showSongDetails
                 ? 'border-white/30 ring-1 ring-white/20'
                 : 'border-white/10 hover:border-white/20'
@@ -303,53 +305,57 @@ export default function PlayerBar({
               src={currentSong.coverImage}
               alt={currentSong.title}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover bg-neutral-900"
+              className="block w-7 h-7 max-w-7 max-h-7 object-cover bg-neutral-900"
             />
           </button>
 
-          <div className="flex-1 flex items-center justify-center gap-1.5 min-w-0">
+          <div className="flex-1 flex items-center justify-center gap-1 min-w-0">
             <button
               id="btn-shuffle-mobile"
               onClick={() => setShuffle(!shuffle)}
               className={`p-1 rounded-lg flex-shrink-0 ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
             >
-              <Shuffle className="w-4 h-4" />
+              <Shuffle className="w-3.5 h-3.5" />
             </button>
             <button id="btn-prev-mobile" onClick={onPrevious} className="p-1 text-neutral-300 flex-shrink-0">
-              <SkipBack className="w-4 h-4 fill-current" />
+              <SkipBack className="w-3.5 h-3.5 fill-current" />
             </button>
             <div className="flex-shrink-0">{playPauseButton}</div>
             <button id="btn-next-mobile" onClick={onNext} className="p-1 text-neutral-300 flex-shrink-0">
-              <SkipForward className="w-4 h-4 fill-current" />
+              <SkipForward className="w-3.5 h-3.5 fill-current" />
             </button>
             <div className="flex-shrink-0">{repeatButton('btn-loop-mobile')}</div>
           </div>
 
-          <button
-            id="btn-lyrics-toggle-mobile"
-            onClick={onToggleLyrics}
-            className={`p-1.5 rounded-lg border flex-shrink-0 transition-all ${
-              showLyrics
-                ? 'border-white/20 app-accent-text'
-                : 'border-white/[0.06] text-neutral-400'
-            }`}
-            title="Telugu Lyrics"
-            aria-label="Toggle lyrics"
-          >
-            <BookOpen className="w-4 h-4" />
-          </button>
+          {lyricsEnabled ? (
+            <button
+              id="btn-lyrics-toggle-mobile"
+              onClick={onToggleLyrics}
+              className={`p-1 rounded-lg border flex-shrink-0 transition-all ${
+                showLyrics
+                  ? 'border-white/20 app-accent-text'
+                  : 'border-white/[0.06] text-neutral-400'
+              }`}
+              title="Telugu Lyrics"
+              aria-label="Toggle lyrics"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <div className="w-5 flex-shrink-0" aria-hidden="true" />
+          )}
         </div>
       </div>
 
       {/* Desktop layout */}
       <div className="hidden md:flex max-w-7xl mx-auto px-4 md:px-8 py-3 items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5 min-w-0 w-1/4">
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 shadow bg-neutral-900">
+        <div className="flex items-center gap-3 min-w-0 w-1/4">
+          <div className="relative w-7 h-7 max-w-7 max-h-7 rounded overflow-hidden flex-shrink-0 border border-white/10 shadow bg-neutral-900">
             <img
               src={currentSong.coverImage}
               alt={currentSong.title}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover"
+              className="block w-7 h-7 max-w-7 max-h-7 object-cover"
             />
           </div>
           <div className="min-w-0">
@@ -402,18 +408,20 @@ export default function PlayerBar({
         </div>
 
         <div className="flex items-center justify-end w-1/4">
-          <button
-            id="btn-lyrics-toggle"
-            onClick={onToggleLyrics}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
-              showLyrics
-                ? 'border-white/20 app-accent-text'
-                : 'bg-white/[0.02] border-white/[0.05] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Telugu Lyrics</span>
-          </button>
+          {lyricsEnabled && (
+            <button
+              id="btn-lyrics-toggle"
+              onClick={onToggleLyrics}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
+                showLyrics
+                  ? 'border-white/20 app-accent-text'
+                  : 'bg-white/[0.02] border-white/[0.05] text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Telugu Lyrics</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
