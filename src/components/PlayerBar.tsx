@@ -284,8 +284,8 @@ export default function PlayerBar({
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden app-player-inner pb-2.5 pt-1 min-w-0">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="md:hidden app-player-inner app-player-mobile-controls pb-2.5 pt-1 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
             id="btn-song-details-mobile"

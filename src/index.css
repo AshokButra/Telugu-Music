@@ -221,6 +221,13 @@ body,
   padding-inline: max(0.5rem, env(safe-area-inset-left)) max(0.5rem, env(safe-area-inset-right));
 }
 
+@media (max-width: 767px) {
+  .app-player-mobile-controls {
+    padding-inline: max(1rem, calc(env(safe-area-inset-left) + 0.375rem))
+      max(1rem, calc(env(safe-area-inset-right) + 0.375rem));
+  }
+}
+
 .player-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
