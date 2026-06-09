@@ -3,7 +3,7 @@ import {
   Plus, Play, Heart, Star, Sparkles, Filter, 
   Trash2, RotateCcw, AlertCircle, Award, Compass, Music, Headphones
 } from 'lucide-react';
-import { Song, RepeatMode, ThemeMode, AccentColor } from './types';
+import { Song, RepeatMode, AccentColor } from './types';
 import {
   TELUGU_SONGS,
   TELUGU_ALBUMS,
@@ -19,6 +19,7 @@ import AlbumCard from './components/AlbumCard';
 import ArtistCard from './components/ArtistCard';
 import PlayerBar from './components/PlayerBar';
 import LyricsPane from './components/LyricsPane';
+import SongDetailsPane from './components/SongDetailsPane';
 import NowPlayingPanel from './components/NowPlayingPanel';
 
 export default function App() {
@@ -45,15 +46,21 @@ export default function App() {
   const [shuffle, setShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('off');
   const [showLyrics, setShowLyrics] = useState(false);
-  const [showPlayerBar, setShowPlayerBar] = useState(false);
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    try {
-      const saved = localStorage.getItem('swaram_theme_mode');
-      return saved === 'light' ? 'light' : 'dark';
-    } catch {
-      return 'dark';
-    }
-  });
+  const [showSongDetails, setShowSongDetails] = useState(false);
+
+  const handleToggleLyrics = () => {
+    setShowLyrics((prev) => {
+      if (!prev) setShowSongDetails(false);
+      return !prev;
+    });
+  };
+
+  const handleToggleSongDetails = () => {
+    setShowSongDetails((prev) => {
+      if (!prev) setShowLyrics(false);
+      return !prev;
+    });
+  };
   const [accentColor, setAccentColor] = useState<AccentColor>(() => {
     try {
       const saved = localStorage.getItem('swaram_accent_color');
@@ -66,10 +73,6 @@ export default function App() {
 
   const cycleRepeatMode = () => {
     setRepeatMode((prev) => (prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off'));
-  };
-
-  const cycleThemeMode = () => {
-    setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const cycleAccentColor = () => {
@@ -89,15 +92,6 @@ export default function App() {
   }, [favoriteIds]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = themeMode;
-    try {
-      localStorage.setItem('swaram_theme_mode', themeMode);
-    } catch (e) {
-      console.error('Failed to save theme mode', e);
-    }
-  }, [themeMode]);
-
-  useEffect(() => {
     document.documentElement.dataset.accent = accentColor;
     try {
       localStorage.setItem('swaram_accent_color', accentColor);
@@ -105,21 +99,6 @@ export default function App() {
       console.error('Failed to save accent color', e);
     }
   }, [accentColor]);
-
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (Math.abs(currentScrollY - lastScrollY) > 8) {
-        setShowPlayerBar(false);
-      }
-      lastScrollY = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Extract unique genre list from raw song data
   const genres = ['All', ...Array.from(new Set(TELUGU_SONGS.map(s => s.genre)))];
@@ -142,7 +121,6 @@ export default function App() {
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
     setIsPlaying(true);
-    setShowPlayerBar(true);
   };
 
   // Forward track navigation logic
@@ -252,7 +230,6 @@ export default function App() {
       if (albumSongs.length > 0) {
         setCurrentSong(albumSongs[0]);
         setIsPlaying(true);
-        setShowPlayerBar(true);
       }
     }
   };
@@ -266,7 +243,7 @@ export default function App() {
   };
 
   return (
-    <div className={`app-shell min-h-screen w-full font-sans transition-[padding] duration-300 ${showPlayerBar ? 'pb-36 sm:pb-32 md:pb-28' : 'pb-6'}`}>
+    <div className="app-shell min-h-screen w-full font-sans pb-36 sm:pb-32 md:pb-28">
       {/* Decorative overhead glowing blobs — clipped so they never cause horizontal scroll */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute top-0 left-1/4 w-[min(350px,80vw)] h-[min(350px,80vw)] rounded-full blur-[120px] app-accent-glow" />
@@ -283,8 +260,6 @@ export default function App() {
         showFavoritesOnly={showFavoritesOnly}
         setShowFavoritesOnly={setShowFavoritesOnly}
         favoriteCount={favoriteIds.length}
-        themeMode={themeMode}
-        onToggleTheme={cycleThemeMode}
         accentColor={accentColor}
         onCycleAccent={cycleAccentColor}
       />
@@ -473,6 +448,14 @@ export default function App() {
         />
       )}
 
+      {showSongDetails && currentSong && (
+        <SongDetailsPane
+          song={currentSong}
+          isPlaying={isPlaying}
+          onClose={() => setShowSongDetails(false)}
+        />
+      )}
+
       {/* Floating Interactive Player Bottom Bar */}
       <PlayerBar
         currentSong={currentSong}
@@ -485,8 +468,9 @@ export default function App() {
         repeatMode={repeatMode}
         onCycleRepeat={cycleRepeatMode}
         showLyrics={showLyrics}
-        setShowLyrics={setShowLyrics}
-        visible={showPlayerBar}
+        onToggleLyrics={handleToggleLyrics}
+        showSongDetails={showSongDetails}
+        onToggleSongDetails={handleToggleSongDetails}
       />
     </div>
   );

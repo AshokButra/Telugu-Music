@@ -1,5 +1,5 @@
-import { Search, Music, Heart, Sparkles, Sun, Moon, Palette } from 'lucide-react';
-import { ThemeMode, AccentColor } from '../types';
+import { Search, Music, Heart, Sparkles, Palette } from 'lucide-react';
+import { AccentColor } from '../types';
 import { motion } from 'motion/react';
 
 interface HeaderProps {
@@ -11,8 +11,6 @@ interface HeaderProps {
   showFavoritesOnly: boolean;
   setShowFavoritesOnly: (fav: boolean) => void;
   favoriteCount: number;
-  themeMode: ThemeMode;
-  onToggleTheme: () => void;
   accentColor: AccentColor;
   onCycleAccent: () => void;
 }
@@ -26,8 +24,6 @@ export default function Header({
   showFavoritesOnly,
   setShowFavoritesOnly,
   favoriteCount,
-  themeMode,
-  onToggleTheme,
   accentColor,
   onCycleAccent
 }: HeaderProps) {
@@ -57,14 +53,6 @@ export default function Header({
 
         {/* Favorite toggle for mobile explicitly alongside other triggers */}
         <div className="md:hidden flex items-center gap-1 flex-shrink-0">
-          <button
-            id="btn-theme-toggle-mobile"
-            onClick={onToggleTheme}
-            className="p-2 rounded-lg app-card text-neutral-300 app-card-hover transition-all"
-            title={themeMode === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-          >
-            {themeMode === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-          </button>
           <button
             id="btn-accent-toggle-mobile"
             onClick={onCycleAccent}
@@ -129,14 +117,6 @@ export default function Header({
           <Heart className={`w-4 h-4 transition-transform duration-300 ${showFavoritesOnly ? 'fill-current scale-110 animate-pulse' : ''}`} />
           <span>My Favorites</span>
           <span className="text-xs bg-white/10 px-1.5 py-0.5 rounded-full font-mono font-bold text-neutral-300">{favoriteCount}</span>
-        </button>
-        <button
-          id="btn-theme-toggle"
-          onClick={onToggleTheme}
-          className="hidden md:flex items-center justify-center p-2.5 rounded-xl app-card text-neutral-300 hover:border-white/20 app-card-hover transition-all"
-          title={themeMode === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-        >
-          {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
         <button
           id="btn-accent-toggle"

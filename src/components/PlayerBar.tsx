@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, ChangeEvent, useCallback } from 'react';
+import React, { useEffect, useState, useRef, ChangeEvent } from 'react';
 import {
   Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1,
-  BookOpen, AlertCircle, Minus, Plus, Volume2
+  BookOpen, AlertCircle
 } from 'lucide-react';
 import { Song, RepeatMode } from '../types';
 
@@ -16,8 +16,9 @@ interface PlayerBarProps {
   repeatMode: RepeatMode;
   onCycleRepeat: () => void;
   showLyrics: boolean;
-  setShowLyrics: (show: boolean) => void;
-  visible: boolean;
+  onToggleLyrics: () => void;
+  showSongDetails: boolean;
+  onToggleSongDetails: () => void;
 }
 
 const formatTime = (secs: number) => {
@@ -27,8 +28,6 @@ const formatTime = (secs: number) => {
   const s = total % 60;
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
-
-const VOLUME_STEP = 10;
 
 export default function PlayerBar({
   currentSong,
@@ -41,12 +40,12 @@ export default function PlayerBar({
   repeatMode,
   onCycleRepeat,
   showLyrics,
-  setShowLyrics,
-  visible
+  onToggleLyrics,
+  showSongDetails,
+  onToggleSongDetails
 }: PlayerBarProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(80);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -54,7 +53,6 @@ export default function PlayerBar({
   const onNextRef = useRef(onNext);
   const repeatModeRef = useRef(repeatMode);
   const isPlayingRef = useRef(isPlaying);
-  const volumeRef = useRef(volume);
 
   useEffect(() => {
     onNextRef.current = onNext;
@@ -69,15 +67,8 @@ export default function PlayerBar({
   }, [isPlaying]);
 
   useEffect(() => {
-    volumeRef.current = volume;
-  }, [volume]);
-
-  const adjustVolume = useCallback((delta: number) => {
-    setVolume((prev) => Math.min(100, Math.max(0, prev + delta)));
-  }, []);
-
-  useEffect(() => {
     const audio = new Audio();
+    audio.volume = 0.8;
     audioRef.current = audio;
 
     const syncDuration = () => {
@@ -179,31 +170,6 @@ export default function PlayerBar({
   }, [isPlaying, currentSong, setIsPlaying]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
-      audioRef.current.muted = volume === 0;
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        adjustVolume(VOLUME_STEP);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        adjustVolume(-VOLUME_STEP);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [adjustVolume]);
-
-  useEffect(() => {
     let rafId = 0;
 
     const tick = () => {
@@ -296,37 +262,8 @@ export default function PlayerBar({
     </button>
   );
 
-  const volumeControls = (prefix: string) => (
-    <div className="flex items-center gap-1">
-      <button
-        id={`btn-volume-down-${prefix}`}
-        onClick={() => adjustVolume(-VOLUME_STEP)}
-        className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
-        title="Volume down"
-        aria-label="Volume down"
-      >
-        <Minus className="w-3.5 h-3.5" />
-      </button>
-      <span className="text-[10px] font-mono text-neutral-500 w-7 text-center">{volume}</span>
-      <button
-        id={`btn-volume-up-${prefix}`}
-        onClick={() => adjustVolume(VOLUME_STEP)}
-        className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
-        title="Volume up"
-        aria-label="Volume up"
-      >
-        <Plus className="w-3.5 h-3.5" />
-      </button>
-    </div>
-  );
-
   return (
-    <div
-      className={`fixed bottom-0 inset-x-0 z-50 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] app-player-bg app-player-shell transition-transform duration-300 ease-out ${
-        visible ? 'translate-y-0' : 'translate-y-full pointer-events-none'
-      }`}
-      aria-hidden={!visible}
-    >
+    <div className="fixed bottom-0 inset-x-0 z-50 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] app-player-bg app-player-shell">
       <div className="app-player-inner md:max-w-7xl pt-2.5 sm:pt-3">
         <input
           type="range"
@@ -335,7 +272,7 @@ export default function PlayerBar({
           step={0.1}
           value={Math.min(currentTime, totalDuration)}
           onChange={handleSeek}
-          className="player-range w-full h-2 sm:h-1.5 md:h-1 focus:outline-none rounded-lg appearance-none cursor-pointer accent-violet-500 transition-all"
+          className="player-range w-full h-1 sm:h-1.5 md:h-1 focus:outline-none rounded-lg appearance-none cursor-pointer accent-violet-500 transition-all"
           style={{
             background: `linear-gradient(to right, rgba(var(--accent-rgb), 1) ${progressPercentage}%, rgba(255, 255, 255, 0.1) ${progressPercentage}%)`
           }}
@@ -347,54 +284,60 @@ export default function PlayerBar({
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden app-player-inner pb-2.5 pt-1 space-y-2 min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-neutral-900">
+      <div className="md:hidden app-player-inner pb-2.5 pt-1 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <button
+            type="button"
+            id="btn-song-details-mobile"
+            onClick={onToggleSongDetails}
+            className={`relative w-8 h-8 rounded-md overflow-hidden flex-shrink-0 border transition-all ${
+              showSongDetails
+                ? 'border-white/30 ring-1 ring-white/20'
+                : 'border-white/10 hover:border-white/20'
+            }`}
+            title="Song details"
+            aria-label="Toggle song details"
+            aria-pressed={showSongDetails}
+          >
             <img
               src={currentSong.coverImage}
               alt={currentSong.title}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover bg-neutral-900"
             />
-          </div>
-          <div className="flex-1 min-w-0 overflow-hidden">
-            <h4 className="font-bold text-neutral-100 text-xs truncate">{currentSong.title}</h4>
-            <p className="text-[10px] text-neutral-400 truncate">{currentSong.artist}</p>
-          </div>
-          <Volume2 className="w-3.5 h-3.5 app-accent-text flex-shrink-0" />
-        </div>
+          </button>
 
-        <div className="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
-          <button
-            id="btn-shuffle-mobile"
-            onClick={() => setShuffle(!shuffle)}
-            className={`p-1 rounded-lg flex-shrink-0 ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
-          >
-            <Shuffle className="w-4 h-4" />
-          </button>
-          <button id="btn-prev-mobile" onClick={onPrevious} className="p-1 text-neutral-300 flex-shrink-0">
-            <SkipBack className="w-4 h-4 fill-current" />
-          </button>
-          <div className="flex-shrink-0">{playPauseButton}</div>
-          <button id="btn-next-mobile" onClick={onNext} className="p-1 text-neutral-300 flex-shrink-0">
-            <SkipForward className="w-4 h-4 fill-current" />
-          </button>
-          <div className="flex-shrink-0">{repeatButton('btn-loop-mobile')}</div>
-        </div>
+          <div className="flex-1 flex items-center justify-center gap-1.5 min-w-0">
+            <button
+              id="btn-shuffle-mobile"
+              onClick={() => setShuffle(!shuffle)}
+              className={`p-1 rounded-lg flex-shrink-0 ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
+            >
+              <Shuffle className="w-4 h-4" />
+            </button>
+            <button id="btn-prev-mobile" onClick={onPrevious} className="p-1 text-neutral-300 flex-shrink-0">
+              <SkipBack className="w-4 h-4 fill-current" />
+            </button>
+            <div className="flex-shrink-0">{playPauseButton}</div>
+            <button id="btn-next-mobile" onClick={onNext} className="p-1 text-neutral-300 flex-shrink-0">
+              <SkipForward className="w-4 h-4 fill-current" />
+            </button>
+            <div className="flex-shrink-0">{repeatButton('btn-loop-mobile')}</div>
+          </div>
 
-        <div className="flex items-center justify-center gap-3">
           <button
             id="btn-lyrics-toggle-mobile"
-            onClick={() => setShowLyrics(!showLyrics)}
-            className={`p-1 rounded-lg border transition-all ${
+            onClick={onToggleLyrics}
+            className={`p-1.5 rounded-lg border flex-shrink-0 transition-all ${
               showLyrics
                 ? 'border-white/20 app-accent-text'
                 : 'border-white/[0.06] text-neutral-400'
             }`}
+            title="Telugu Lyrics"
+            aria-label="Toggle lyrics"
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="w-4 h-4" />
           </button>
-          {volumeControls('mobile')}
         </div>
       </div>
 
@@ -458,10 +401,10 @@ export default function PlayerBar({
           {repeatButton('btn-loop')}
         </div>
 
-        <div className="flex items-center justify-end gap-3 w-1/4">
+        <div className="flex items-center justify-end w-1/4">
           <button
             id="btn-lyrics-toggle"
-            onClick={() => setShowLyrics(!showLyrics)}
+            onClick={onToggleLyrics}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition-all ${
               showLyrics
                 ? 'border-white/20 app-accent-text'
@@ -471,7 +414,6 @@ export default function PlayerBar({
             <BookOpen className="w-3.5 h-3.5" />
             <span>Telugu Lyrics</span>
           </button>
-          {volumeControls('desktop')}
         </div>
       </div>
     </div>

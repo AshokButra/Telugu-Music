@@ -24,7 +24,6 @@ export interface Album {
 }
 
 export type RepeatMode = 'off' | 'all' | 'one';
-export type ThemeMode = 'dark' | 'light';
 export type AccentColor = 'purple' | 'emerald' | 'rose' | 'amber' | 'sky';
 
 export interface Artist {
