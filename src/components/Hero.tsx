@@ -17,8 +17,8 @@ export default function Hero({ onPlaySong, favoriteIds, toggleFavorite }: HeroPr
   return (
     <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl app-main-card-gradient border border-white/[0.06] p-4 sm:p-8 md:p-10 lg:p-12 mb-6 sm:mb-8 shadow-2xl">
       {/* Background radial soft light gradient */}
-      <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full app-accent-glow blur-[90px] pointer-events-none" />
-      <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full app-accent-glow blur-[90px] pointer-events-none" />
+      <div className="absolute -right-16 -top-16 w-[min(18rem,70vw)] h-[min(18rem,70vw)] rounded-full app-accent-glow blur-[90px] pointer-events-none" />
+      <div className="absolute -left-16 -bottom-16 w-[min(18rem,70vw)] h-[min(18rem,70vw)] rounded-full app-accent-glow blur-[90px] pointer-events-none" />
       
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Left Info Column */}

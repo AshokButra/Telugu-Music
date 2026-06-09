@@ -45,6 +45,7 @@ export default function App() {
   const [shuffle, setShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>('off');
   const [showLyrics, setShowLyrics] = useState(false);
+  const [showPlayerBar, setShowPlayerBar] = useState(false);
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     try {
       const saved = localStorage.getItem('swaram_theme_mode');
@@ -105,6 +106,21 @@ export default function App() {
     }
   }, [accentColor]);
 
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (Math.abs(currentScrollY - lastScrollY) > 8) {
+        setShowPlayerBar(false);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Extract unique genre list from raw song data
   const genres = ['All', ...Array.from(new Set(TELUGU_SONGS.map(s => s.genre)))];
 
@@ -126,6 +142,7 @@ export default function App() {
   const handlePlaySong = (song: Song) => {
     setCurrentSong(song);
     setIsPlaying(true);
+    setShowPlayerBar(true);
   };
 
   // Forward track navigation logic
@@ -235,6 +252,7 @@ export default function App() {
       if (albumSongs.length > 0) {
         setCurrentSong(albumSongs[0]);
         setIsPlaying(true);
+        setShowPlayerBar(true);
       }
     }
   };
@@ -248,10 +266,12 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell min-h-screen w-full font-sans pb-36 sm:pb-32 md:pb-28">
-      {/* Decorative overhead glowing blobs */}
-      <div className="absolute top-0 left-1/4 w-[350px] h-[350px] rounded-full blur-[120px] pointer-events-none app-accent-glow" />
-      <div className="absolute top-20 right-1/4 w-[280px] h-[280px] rounded-full blur-[100px] pointer-events-none app-accent-glow" />
+    <div className={`app-shell min-h-screen w-full font-sans transition-[padding] duration-300 ${showPlayerBar ? 'pb-36 sm:pb-32 md:pb-28' : 'pb-6'}`}>
+      {/* Decorative overhead glowing blobs — clipped so they never cause horizontal scroll */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute top-0 left-1/4 w-[min(350px,80vw)] h-[min(350px,80vw)] rounded-full blur-[120px] app-accent-glow" />
+        <div className="absolute top-20 right-1/4 w-[min(280px,70vw)] h-[min(280px,70vw)] rounded-full blur-[100px] app-accent-glow" />
+      </div>
 
       {/* Persistent Nav Sticky Header */}
       <Header
@@ -270,7 +290,7 @@ export default function App() {
       />
 
       {/* Main Grid Section */}
-      <main className="w-full max-w-[1600px] mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <main className="relative z-10 w-full min-w-0 max-w-[1600px] mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6">
         
         {/* Spotlight Showcase Hero */}
         {!showFavoritesOnly && !searchQuery && !selectedArtist && !selectedAlbum && activeGenre === 'All' && (
@@ -325,7 +345,7 @@ export default function App() {
         </div>
 
         {/* Content Rows */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start min-w-0">
           
           {/* Left Large Column: Songs Grids */}
           <div className="md:col-span-7 lg:col-span-8 space-y-8">
@@ -460,14 +480,13 @@ export default function App() {
         setIsPlaying={setIsPlaying}
         onNext={handleNextSong}
         onPrevious={handlePreviousSong}
-        isFavorite={currentSong ? favoriteIds.includes(currentSong.id) : false}
-        onToggleFavorite={toggleFavorite}
         shuffle={shuffle}
         setShuffle={setShuffle}
         repeatMode={repeatMode}
         onCycleRepeat={cycleRepeatMode}
         showLyrics={showLyrics}
         setShowLyrics={setShowLyrics}
+        visible={showPlayerBar}
       />
     </div>
   );

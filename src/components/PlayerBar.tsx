@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, ChangeEvent } from 'react';
+import React, { useEffect, useState, useRef, ChangeEvent, useCallback } from 'react';
 import {
   Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Repeat1,
-  Volume2, VolumeX, Heart, Sparkles, BookOpen, AlertCircle
+  BookOpen, AlertCircle, Minus, Plus, Volume2
 } from 'lucide-react';
 import { Song, RepeatMode } from '../types';
 
@@ -11,14 +11,13 @@ interface PlayerBarProps {
   setIsPlaying: (playing: boolean) => void;
   onNext: () => void;
   onPrevious: () => void;
-  isFavorite: boolean;
-  onToggleFavorite: (songId: string) => void;
   shuffle: boolean;
   setShuffle: (shuf: boolean) => void;
   repeatMode: RepeatMode;
   onCycleRepeat: () => void;
   showLyrics: boolean;
   setShowLyrics: (show: boolean) => void;
+  visible: boolean;
 }
 
 const formatTime = (secs: number) => {
@@ -29,25 +28,25 @@ const formatTime = (secs: number) => {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 };
 
+const VOLUME_STEP = 10;
+
 export default function PlayerBar({
   currentSong,
   isPlaying,
   setIsPlaying,
   onNext,
   onPrevious,
-  isFavorite,
-  onToggleFavorite,
   shuffle,
   setShuffle,
   repeatMode,
   onCycleRepeat,
   showLyrics,
-  setShowLyrics
+  setShowLyrics,
+  visible
 }: PlayerBarProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(80);
-  const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -55,6 +54,7 @@ export default function PlayerBar({
   const onNextRef = useRef(onNext);
   const repeatModeRef = useRef(repeatMode);
   const isPlayingRef = useRef(isPlaying);
+  const volumeRef = useRef(volume);
 
   useEffect(() => {
     onNextRef.current = onNext;
@@ -67,6 +67,14 @@ export default function PlayerBar({
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
+
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
+
+  const adjustVolume = useCallback((delta: number) => {
+    setVolume((prev) => Math.min(100, Math.max(0, prev + delta)));
+  }, []);
 
   useEffect(() => {
     const audio = new Audio();
@@ -172,12 +180,29 @@ export default function PlayerBar({
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume / 100;
-      audioRef.current.muted = isMuted;
+      audioRef.current.volume = volume / 100;
+      audioRef.current.muted = volume === 0;
     }
-  }, [volume, isMuted]);
+  }, [volume]);
 
-  // Smooth timeline updates while playing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        adjustVolume(VOLUME_STEP);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        adjustVolume(-VOLUME_STEP);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [adjustVolume]);
+
   useEffect(() => {
     let rafId = 0;
 
@@ -230,7 +255,7 @@ export default function PlayerBar({
   const repeatTitle =
     repeatMode === 'one' ? 'Repeat One' : repeatMode === 'all' ? 'Repeat All' : 'Repeat Off';
 
-  const repeatButton = (id: string, mobile = false) => (
+  const repeatButton = (id: string) => (
     <button
       id={id}
       onClick={onCycleRepeat}
@@ -239,11 +264,7 @@ export default function PlayerBar({
       }`}
       title={repeatTitle}
     >
-      {repeatMode === 'one' ? (
-        <Repeat1 className={mobile ? 'w-4 h-4' : 'w-4 h-4'} />
-      ) : (
-        <Repeat className={mobile ? 'w-4 h-4' : 'w-4 h-4'} />
-      )}
+      {repeatMode === 'one' ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
       {repeatMode === 'one' && (
         <span className="absolute -top-0.5 -right-0.5 text-[8px] font-extrabold app-accent-text leading-none">
           1
@@ -256,7 +277,7 @@ export default function PlayerBar({
     <button
       id="btn-play-pause"
       onClick={handlePlayPause}
-      className={`p-2.5 sm:p-3 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer ${
+      className={`p-2 sm:p-3 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer flex-shrink-0 ${
         hasError
           ? 'bg-rose-600 hover:bg-rose-500 text-white'
           : 'bg-white hover:bg-neutral-100 text-black'
@@ -275,10 +296,38 @@ export default function PlayerBar({
     </button>
   );
 
+  const volumeControls = (prefix: string) => (
+    <div className="flex items-center gap-1">
+      <button
+        id={`btn-volume-down-${prefix}`}
+        onClick={() => adjustVolume(-VOLUME_STEP)}
+        className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
+        title="Volume down"
+        aria-label="Volume down"
+      >
+        <Minus className="w-3.5 h-3.5" />
+      </button>
+      <span className="text-[10px] font-mono text-neutral-500 w-7 text-center">{volume}</span>
+      <button
+        id={`btn-volume-up-${prefix}`}
+        onClick={() => adjustVolume(VOLUME_STEP)}
+        className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
+        title="Volume up"
+        aria-label="Volume up"
+      >
+        <Plus className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] app-player-bg">
-      {/* Progress bar */}
-      <div className="w-full max-w-[720px] md:max-w-7xl mx-auto px-3 sm:px-4 md:px-8 pt-2.5 sm:pt-3">
+    <div
+      className={`fixed bottom-0 inset-x-0 z-50 border-t border-white/[0.08] shadow-2xl backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] app-player-bg app-player-shell transition-transform duration-300 ease-out ${
+        visible ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+      }`}
+      aria-hidden={!visible}
+    >
+      <div className="app-player-inner md:max-w-7xl pt-2.5 sm:pt-3">
         <input
           type="range"
           min={0}
@@ -298,9 +347,9 @@ export default function PlayerBar({
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden max-w-[720px] mx-auto px-3 pb-2.5 pt-1 space-y-2.5">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-neutral-900">
+      <div className="md:hidden app-player-inner pb-2.5 pt-1 space-y-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-neutral-900">
             <img
               src={currentSong.coverImage}
               alt={currentSong.title}
@@ -308,82 +357,58 @@ export default function PlayerBar({
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <h4 className="font-bold text-neutral-100 text-xs truncate">{currentSong.title}</h4>
             <p className="text-[10px] text-neutral-400 truncate">{currentSong.artist}</p>
           </div>
+          <Volume2 className="w-3.5 h-3.5 app-accent-text flex-shrink-0" />
+        </div>
+
+        <div className="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
           <button
-            onClick={() => onToggleFavorite(currentSong.id)}
-            className="flex-shrink-0 text-neutral-400 hover:text-violet-400 p-1.5 rounded-full"
+            id="btn-shuffle-mobile"
+            onClick={() => setShuffle(!shuffle)}
+            className={`p-1 rounded-lg flex-shrink-0 ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current app-accent-text' : ''}`} />
+            <Shuffle className="w-4 h-4" />
           </button>
+          <button id="btn-prev-mobile" onClick={onPrevious} className="p-1 text-neutral-300 flex-shrink-0">
+            <SkipBack className="w-4 h-4 fill-current" />
+          </button>
+          <div className="flex-shrink-0">{playPauseButton}</div>
+          <button id="btn-next-mobile" onClick={onNext} className="p-1 text-neutral-300 flex-shrink-0">
+            <SkipForward className="w-4 h-4 fill-current" />
+          </button>
+          <div className="flex-shrink-0">{repeatButton('btn-loop-mobile')}</div>
+        </div>
+
+        <div className="flex items-center justify-center gap-3">
           <button
             id="btn-lyrics-toggle-mobile"
             onClick={() => setShowLyrics(!showLyrics)}
-            className={`flex-shrink-0 p-1.5 rounded-lg border transition-all ${
+            className={`p-1 rounded-lg border transition-all ${
               showLyrics
                 ? 'border-white/20 app-accent-text'
                 : 'border-white/[0.06] text-neutral-400'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-3.5 h-3.5" />
           </button>
-          <button
-            id="btn-mute-mobile"
-            onClick={() => setIsMuted(!isMuted)}
-            className="flex-shrink-0 p-1.5 text-neutral-400"
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="w-4 h-4" />
-            ) : (
-              <Volume2 className="w-4 h-4 app-accent-text" />
-            )}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center px-1">
-          <div className="flex justify-start">
-            <button
-              id="btn-shuffle-mobile"
-              onClick={() => setShuffle(!shuffle)}
-              className={`p-1.5 rounded-lg ${shuffle ? 'app-accent-text' : 'text-neutral-500'}`}
-            >
-              <Shuffle className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4.5 justify-center">
-            <button id="btn-prev-mobile" onClick={onPrevious} className="p-1.5 text-neutral-300">
-              <SkipBack className="w-5 h-5 fill-current" />
-            </button>
-            {playPauseButton}
-            <button id="btn-next-mobile" onClick={onNext} className="p-1.5 text-neutral-300">
-              <SkipForward className="w-5 h-5 fill-current" />
-            </button>
-          </div>
-
-          <div className="flex justify-end">
-            {repeatButton('btn-loop-mobile', true)}
-          </div>
+          {volumeControls('mobile')}
         </div>
       </div>
 
       {/* Desktop layout */}
       <div className="hidden md:flex max-w-7xl mx-auto px-4 md:px-8 py-3 items-center justify-between gap-4">
         <div className="flex items-center gap-3.5 min-w-0 w-1/4">
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 shadow bg-neutral-900 group">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 shadow bg-neutral-900">
             <img
               src={currentSong.coverImage}
               alt={currentSong.title}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover group-hover:rotate-6 transition-transform"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-violet-950/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-              <Sparkles className="w-4.5 h-4.5 app-accent-text animate-pulse" />
-            </div>
           </div>
-
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
               <h4 className="font-bold text-neutral-100 text-sm truncate">{currentSong.title}</h4>
@@ -400,13 +425,6 @@ export default function PlayerBar({
             </div>
             <p className="text-[11px] text-neutral-400 truncate mt-0.5">{currentSong.artist}</p>
           </div>
-
-          <button
-            onClick={() => onToggleFavorite(currentSong.id)}
-            className="flex-shrink-0 text-neutral-400 hover:text-violet-400 p-1.5 rounded-full hover:bg-white/[0.04] transition-colors cursor-pointer"
-          >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current app-accent-text scale-110' : ''}`} />
-          </button>
         </div>
 
         <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
@@ -420,7 +438,6 @@ export default function PlayerBar({
           >
             <Shuffle className="w-4 h-4" />
           </button>
-
           <button
             id="btn-prev"
             onClick={onPrevious}
@@ -429,9 +446,7 @@ export default function PlayerBar({
           >
             <SkipBack className="w-5 h-5 fill-current" />
           </button>
-
           {playPauseButton}
-
           <button
             id="btn-next"
             onClick={onNext}
@@ -440,11 +455,10 @@ export default function PlayerBar({
           >
             <SkipForward className="w-5 h-5 fill-current" />
           </button>
-
           {repeatButton('btn-loop')}
         </div>
 
-        <div className="flex items-center justify-end gap-4 w-1/4">
+        <div className="flex items-center justify-end gap-3 w-1/4">
           <button
             id="btn-lyrics-toggle"
             onClick={() => setShowLyrics(!showLyrics)}
@@ -457,35 +471,7 @@ export default function PlayerBar({
             <BookOpen className="w-3.5 h-3.5" />
             <span>Telugu Lyrics</span>
           </button>
-
-          <div className="flex items-center gap-2">
-            <button
-              id="btn-mute"
-              onClick={() => setIsMuted(!isMuted)}
-              className="text-neutral-400 hover:text-white p-1 transition-colors cursor-pointer"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX className="w-4 h-4 text-neutral-500" />
-              ) : (
-                <Volume2 className="w-4 h-4 app-accent-text" />
-              )}
-            </button>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => {
-                setVolume(parseInt(e.target.value));
-                if (isMuted) setIsMuted(false);
-              }}
-              className="player-range w-20 h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-violet-500"
-              style={{
-                background: `linear-gradient(to right, rgba(var(--accent-rgb), 1) ${isMuted ? 0 : volume}%, rgba(255, 255, 255, 0.1) ${isMuted ? 0 : volume}%)`
-              }}
-            />
-          </div>
+          {volumeControls('desktop')}
         </div>
       </div>
     </div>

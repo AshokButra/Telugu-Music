@@ -32,9 +32,9 @@ export default function Header({
   onCycleAccent
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-white/[0.06] app-header-bg backdrop-blur-md px-3 sm:px-4 py-2.5 sm:py-3 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 pt-[max(0.625rem,env(safe-area-inset-top))]">
+    <header className="sticky top-0 z-30 w-full min-w-0 max-w-[100vw] overflow-x-clip border-b border-white/[0.06] app-header-bg backdrop-blur-md px-2 sm:px-4 py-2.5 sm:py-3 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 pt-[max(0.625rem,env(safe-area-inset-top))]">
       {/* Platform Branding */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between min-w-0 gap-2">
         <div 
           className="flex items-center gap-3 cursor-pointer group"
           onClick={() => {
@@ -56,7 +56,7 @@ export default function Header({
         </div>
 
         {/* Favorite toggle for mobile explicitly alongside other triggers */}
-        <div className="md:hidden flex items-center gap-1.5">
+        <div className="md:hidden flex items-center gap-1 flex-shrink-0">
           <button
             id="btn-theme-toggle-mobile"
             onClick={onToggleTheme}
